@@ -13,15 +13,6 @@ fit_data <- subset(fit_data, is.finite(Veq_Na))
 fit_data <- subset(fit_data, is.finite(Veq_K))
 fit_data <- subset(fit_data, is.finite(Veq_Cl))
 
-### Check univariate relationships between all features and EPs (after regressing out the effect of other features)
-lmp <- function (modelobject) {
-  if (class(modelobject) != "lm") stop("Not an object of class 'lm' ")
-  f <- summary(modelobject)$fstatistic
-  p <- pf(f[1],f[2],f[3],lower.tail=F)
-  attributes(p) <- NULL
-  return(p)
-}
-
 rf_result <- data.frame(matrix(NA, ncol = length(ions), nrow = length(ephys_interest)))
 colnames(rf_result) <- paste0("Veq_", ions)
 rownames(rf_result) <- ephys_interest

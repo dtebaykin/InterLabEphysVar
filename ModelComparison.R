@@ -4,12 +4,7 @@
 # Version: v1 (2 August 2017)
 
 ### Compare different models and generate figures
-
 ### Feature selection, 100 runs with 90% train : 10% test data split. Next time paralellize it: mclapply or foreach
-get_R2 <- function(obs, pred) {
-  1 - sum((obs - pred)^2) / sum((obs - mean(obs))^2 )
-}
-
 # Plot rf real vs predicted values for each ephys property
 plot_rf_vals <- function(vals, rf_res) {
   plot_data <- as.data.frame(vals[, 1:(length(ephys_interest)*2)])
@@ -227,7 +222,6 @@ p = ggplot(plot_data, aes(x = variable, y = value)) +
   ylim(-0.5,0.5) +
   labs(x = "Electrophysiological properties", y = "Out-of-sample R2") +
   theme_few(15)
-#theme(legend.position="none")
 print(p)
 ggsave(plot=p,height=5,width=12,dpi=200, filename= paste0(getwd(), "/Plots/R2 model comparison.pdf"), useDingbats=FALSE)
 

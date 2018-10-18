@@ -116,3 +116,12 @@ getModel <- function(df, model, formula, model_args = NULL) {
   fit = do.call(model, c(list(formula = as.formula(formula), data = run_data), model_args) )
   return(fit)
 }
+
+### Check univariate relationships between all features and EPs (after regressing out the effect of other features)
+lmp <- function (modelobject) {
+  if (class(modelobject) != "lm") stop("Not an object of class 'lm' ")
+  f <- summary(modelobject)$fstatistic
+  p <- pf(f[1],f[2],f[3],lower.tail=F)
+  attributes(p) <- NULL
+  return(p)
+}

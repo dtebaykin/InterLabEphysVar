@@ -1,30 +1,33 @@
 # Project: Interlab ephys variance modeling
 # Author: Dmitry Tebaykin
 # Contact: dmitry.tebaykin@gmail.com
-# Version: v1 (2 August 2017)
+# Version: v2 (17 October 2018)
 
 ### This script loads and processes the data. It must be run before any further analysis can take place.
 ### It requires ephys_data_curated.csv dataset file from the /Data folder
 
 ### Load required libraries
-library(ggplot2)
-library(devtools)
-library(ggbiplot)
-library(RColorBrewer)
-library(reshape2)
-library(pheatmap)
-library(cluster)
-library(dplyr)
-library(ggthemes)
-library(cowplot)
-library(mlbench)
-library(randomForest)
-library(party)
-library(Metrics)
-library(formula.tools)
-library(caret)
-library(splines2)
-library(data.table)
+libs <- c('ggplot2','RColorBrewer','ggbiplot','reshape2', 'devtools',
+          'formula.tools', 'randomForest', 'cowplot', 'cluster','caret',
+          'pheatmap', 'ggthemes', 'dplyr','mlbench','party','Metrics',
+          'splines2','data.table')
+biocLite <- source("http://bioconductor.org/biocLite.R")
+
+for (L in libs){
+  if(!require(L, character.only = T)) {
+    install.packages(L, dep = T, quiet = T)
+    
+    if (!require(L, character.only = T)) {
+        suppressWarnings(biocLite(L))
+    }
+  }
+}
+
+sourceFiles <- c('CVfunc.R')
+for (s in sourceFiles) {
+  source(s)
+}
+rm(L, libs, s, sourceFiles)
 
 theme_set(theme_cowplot())
 
