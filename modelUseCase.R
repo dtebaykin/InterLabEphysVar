@@ -98,9 +98,9 @@ for (i in 1:length(relevant_solns)) {
   plot_data = rbind(plot_data, temp)
   
   # Remove textmining outliers for plotting
-  minThresh = quantile(plot_data[,relevant_solns[i]], 0.02)
-  maxThresh = quantile(plot_data[,relevant_solns[i]], 0.98)
-  test = plot_data[which(plot_data[,relevant_solns[i]] >= minThresh &
+  minThresh = quantile(plot_data[,relevant_solns[i]], 0.01)
+  maxThresh = quantile(plot_data[,relevant_solns[i]], 0.99)
+  plot_data = plot_data[which(plot_data[,relevant_solns[i]] >= minThresh &
                         plot_data[,relevant_solns[i]] <= maxThresh),]
 
   print(paste0("Saving plot to: ", paste0(getwd(), "/Plots/univariatePlots/", ep, "Vs", relevant_solns[i], ".pdf")))
