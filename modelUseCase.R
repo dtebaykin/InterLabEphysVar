@@ -5,7 +5,7 @@
 # Contact: dmitry.tebaykin@gmail.com
 
 # Load required and potentially useful packages
-libs <- c('ggplot2','RColorBrewer','ggbiplot','reshape2', 'devtools',
+libs <- c('ggplot2','RColorBrewer','reshape2', 'devtools',
           'formula.tools', 'randomForest', 'cowplot', 'cluster','caret',
           'pheatmap', 'ggthemes', 'dplyr','mlbench','party','Metrics',
           'splines2','data.table')
@@ -49,6 +49,9 @@ for (f in 1:10) {
 }
 rm(f, pmids, split)
 
+# also store output of model fitting so we can save this result across runs 
+plot_data_list_out = list()
+
 for (i in 1:length(relevant_solns)) {
   # Create data copy for the current run
   run_data = rf_data
@@ -88,15 +91,17 @@ for (i in 1:length(relevant_solns)) {
   if (ep %in% log10_ephys) {
     plot_data$ep_shifted = 10**plot_data$ep_shifted
   }
-  
+
+  plot_data_list_out[[i]] = plot_data
+
   plot_data$group = "All"
   plot_data[plot_data$NeuronName == "Hippocampus CA1 pyramidal cell",]$group = "CA1"
   plot_data[plot_data$NeuronName == "Neocortex basket cell",]$group = "Basket"
-  
+
   temp = subset(plot_data, group != "All")
   temp$group = "All"
   plot_data = rbind(plot_data, temp)
-  
+
   # Remove textmining outliers for plotting
   minThresh = quantile(plot_data[,relevant_solns[i]], 0.02)
   maxThresh = quantile(plot_data[,relevant_solns[i]], 0.98)
@@ -107,24 +112,28 @@ for (i in 1:length(relevant_solns)) {
   p = ggplot(plot_data, aes_string(x = relevant_solns[i], y = "ep_shifted", color = "group")) +
     geom_point(shape = 19, alpha = 0.2, size = 2) +
     stat_smooth(method = "lm", size = 1.5, level = 0.95, se = F) +
-    
+
     scale_color_manual(values = c("#000000", "#8A458A", "darkblue")) +
     ggtitle(paste0("All NTs, adj.: ", ep_plotname, " ~ ", feat_plotname)) +
     labs(x = feat_plotname, y = ep_plotname) +
     theme_few(15) +
     facet_wrap(~group, scales = "free_x")
   ggsave(plot=p,height=4, width=8,dpi=200, filename = paste0(getwd(), "/Plots/univariatePlots/", ep, "Vs", relevant_solns[i], ".pdf"), useDingbats=FALSE)
-  
+
   # Stats to go along with the figures
   frml_uni = as.formula(paste("ep_shifted ~ ", relevant_solns[i]))
   print(paste("All p-val: ", lmp(lm(frml_uni, data = subset(plot_data, group == "All")))))
   print(paste("All cor: ", cor(subset(plot_data, group == "All")$ep_shifted, subset(plot_data, group == "All")[,relevant_solns[i]])))
-  
+
   print(paste("CA1 p-val: " ,lmp(lm(frml_uni, data = subset(plot_data, group == "CA1")))))
   print(paste("CA1 cor: ", cor(subset(plot_data, group == "CA1")$ep_shifted, subset(plot_data, group == "CA1")[,relevant_solns[i]])))
-  
+
   print(paste("Basket p-val: ", lmp(lm(frml_uni, data = subset(plot_data, group == "Basket")))))
-  print(paste("Basket cor: ", cor(subset(plot_data, group == "Basket")$ep_shifted, subset(plot_data, group == "Basket")[,relevant_solns[i]])))  
+  print(paste("Basket cor: ", cor(subset(plot_data, group == "Basket")$ep_shifted, subset(plot_data, group == "Basket")[,relevant_solns[i]])))
   print("Model complete.")
 }
+names(plot_data_list_out) = relevant_solns
+saveRDS(plot_data_list_out, 'Data/rmp_adjusted_data_frames.RDS')
 rm(k, i, ep_plotname, sel_feat, rf_model, temp, p)
+
+
